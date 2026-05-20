@@ -1,0 +1,5 @@
+# Verilator build output
+obj_dir/
+
+# Re-include VCD waveform files (committed for reference)
+!*.vcd
