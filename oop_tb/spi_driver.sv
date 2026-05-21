@@ -4,31 +4,6 @@ class driver;
     function new(mailbox#(spi_transaction) mbx);
         gen2drv_mbx = mbx;
     endfunction
-    
-    task run(
-        input   logic REFCLK,
-        ref     logic RST_N,
-        ref     logic [7:0] M_INPUT,
-        ref     logic [2:0] M_SELECT_SS,
-        ref     logic [1:0] M_CNTL,
-        ref     logic [7:0] S_INPUT,
-        ref     logic S_LOAD,
-        input   logic M_READY,
-        input   logic S_READY
-    );
-
-
-
-    forever begin 
-        spi_transaction trans;
-        gen2drv_mbx.get(trans);
-
-        trans.display("[DRV]");
-        drive_transfer(trans, REFCLK, M_INPUT, M_SELECT_SS, M_CNTL, S_INPUT, S_LOAD, M_READY, S_READY);
-        
-    end
-        
-    endtask
 
     task drive_transfer(
         spi_transaction trans,
@@ -88,4 +63,28 @@ class driver;
         M_CNTL = 2'b00;
         @(posedge REFCLK);
     endtask
+
+    task run(
+        input   logic REFCLK,
+        ref     logic RST_N,
+        ref     logic [7:0] M_INPUT,
+        ref     logic [2:0] M_SELECT_SS,
+        ref     logic [1:0] M_CNTL,
+        ref     logic [7:0] S_INPUT,
+        ref     logic S_LOAD,
+        input   logic M_READY,
+        input   logic S_READY
+    );
+
+    forever begin 
+        spi_transaction trans;
+        gen2drv_mbx.get(trans);
+
+        trans.display("[DRV]");
+        drive_transfer(trans, REFCLK, M_INPUT, M_SELECT_SS, M_CNTL, S_INPUT, S_LOAD, M_READY, S_READY);
+        
+    end
+        
+    endtask
+
 endclass 
