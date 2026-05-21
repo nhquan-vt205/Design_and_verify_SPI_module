@@ -83,8 +83,10 @@ module tb_top;
 
         // ──────────────────────────────────────────────────────────
         // Chờ thêm để Monitor xử lý transaction cuối
+        // Đã tăng thời gian chờ lên đủ dài để chạy hết 5 transaction
+        // (mỗi transaction tốn >160ns, nên 5 cái tốn >800ns)
         // ──────────────────────────────────────────────────────────
-        #(CLK_PERIOD * 50);
+        #(CLK_PERIOD * 200);
 
         // ──────────────────────────────────────────────────────────
         // Report

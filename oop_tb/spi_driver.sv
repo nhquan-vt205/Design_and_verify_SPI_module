@@ -7,14 +7,14 @@ class spi_driver;
 
     task drive_transfer(
         spi_transaction trans,
-        input  logic REFCLK,
+        ref    logic REFCLK,
         ref    logic [7:0] M_INPUT,
         ref    logic [2:0] M_SELECT_SS,
         ref    logic [1:0] M_CNTL,
         ref    logic [7:0] S_INPUT,
         ref    logic       S_LOAD,
-        input  logic       M_READY,
-        input  logic       S_READY
+        ref    logic       M_READY,
+        ref    logic       S_READY
     );
         // ────────────────────────────────────────────────────────────
         // Bước 1: Preload Slave TX data
@@ -52,28 +52,25 @@ class spi_driver;
         M_CNTL = 2'b11;             // master vào ST_TRANSFER
         @(negedge M_READY);         // M_READY xuống khi transfer bắt đầu
 
+        // Release CNTL so master can transition back to IDLE later
+        M_CNTL = 2'b00;
+
         // ────────────────────────────────────────────────────────────
         // Bước 5: Chờ transfer hoàn tất
         // ────────────────────────────────────────────────────────────
         @(posedge M_READY);         // M_READY lên lại khi về ST_IDLE
-
-        // ────────────────────────────────────────────────────────────
-        // Bước 6: Release CNTL
-        // ────────────────────────────────────────────────────────────
-        M_CNTL = 2'b00;
         @(posedge REFCLK);
     endtask
 
     task run(
-        input  logic       REFCLK,
-        ref    logic       RST_N,
+        ref    logic       REFCLK,
         ref    logic [7:0] M_INPUT,
         ref    logic [2:0] M_SELECT_SS,
         ref    logic [1:0] M_CNTL,
         ref    logic [7:0] S_INPUT,
         ref    logic       S_LOAD,
-        input  logic       M_READY,
-        input  logic       S_READY
+        ref    logic       M_READY,
+        ref    logic       S_READY
     );
         spi_transaction trans;
         forever begin

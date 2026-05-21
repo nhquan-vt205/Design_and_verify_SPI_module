@@ -8,11 +8,11 @@ class spi_monitor;
     endfunction
 
     task run(
-        input logic        REFCLK,
-        input logic [7:0]  M_OUTPUT,
-        input logic [7:0]  S_OUTPUT,
-        input logic [7:0]  SS,
-        input logic        M_READY
+        ref logic        REFCLK,
+        ref logic [7:0]  M_OUTPUT,
+        ref logic [7:0]  S_OUTPUT,
+        ref logic [7:0]  SS,
+        ref logic        M_READY
     );
         // Khai báo biến local ở đầu task, KHÔNG khai báo bên trong begin...end
         // vì iverilog không hỗ trợ variable declaration inside procedural blocks
