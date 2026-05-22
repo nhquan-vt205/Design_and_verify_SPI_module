@@ -17,39 +17,47 @@ class spi_driver;
         ref    logic       S_READY
     );
         // ────────────────────────────────────────────────────────────
+        // Chiến lược drive: tất cả tín hiệu input được đặt tại
+        // NEGEDGE REFCLK để dữ liệu ổn định (setup time) trước khi
+        // DUT sample tại posedge tiếp theo → tránh race condition.
+        // ────────────────────────────────────────────────────────────
+
+        // ────────────────────────────────────────────────────────────
         // Bước 1: Preload Slave TX data
         // ────────────────────────────────────────────────────────────
-        @(posedge REFCLK);
+        @(negedge REFCLK);
         wait(S_READY == 1);         // chờ slave sẵn sàng
-        S_INPUT = trans.s_data;     // đặt byte slave muốn gửi
+        @(negedge REFCLK);          // lấy negedge kế tiếp để drive
+        S_INPUT = trans.s_data;     // đặt byte slave muốn gửi (ổn định trước posedge)
         S_LOAD  = 1;
-        @(posedge REFCLK);          // 1 cycle: slave latch vào tx_shift
+        @(negedge REFCLK);          // DUT đã latch ở posedge vừa qua, hạ S_LOAD
         S_LOAD  = 0;
 
         // ────────────────────────────────────────────────────────────
         // Bước 2: Load Master TX data (CNTL=01)
         // ────────────────────────────────────────────────────────────
+        @(negedge REFCLK);
         wait(M_READY == 1);         // chờ master idle
-        @(posedge REFCLK);
-        M_INPUT = trans.m_data;     // đặt byte master muốn gửi
+        @(negedge REFCLK);          // lấy negedge kế tiếp để drive
+        M_INPUT = trans.m_data;     // đặt byte master muốn gửi (ổn định trước posedge)
         M_CNTL  = 2'b01;
-        @(posedge REFCLK);          // 1 cycle: master latch vào tx_data
+        @(negedge REFCLK);          // DUT đã latch CNTL=01 ở posedge, trả về 00
         M_CNTL  = 2'b00;
 
         // ────────────────────────────────────────────────────────────
         // Bước 3: Store Slave Address (CNTL=10)
         // ────────────────────────────────────────────────────────────
-        @(posedge REFCLK);
+        @(negedge REFCLK);
         M_SELECT_SS = trans.ss_addr;
         M_CNTL      = 2'b10;
-        @(posedge REFCLK);          // 1 cycle: master decode selected_ss
+        @(negedge REFCLK);          // DUT đã decode selected_ss, trả về 00
         M_CNTL      = 2'b00;
 
         // ────────────────────────────────────────────────────────────
         // Bước 4: Start Transfer (CNTL=11)
         // ────────────────────────────────────────────────────────────
-        @(posedge REFCLK);
-        M_CNTL = 2'b11;             // master vào ST_TRANSFER
+        @(negedge REFCLK);
+        M_CNTL = 2'b11;             // đặt ở negedge → DUT thấy CNTL=11 tại posedge tới
         @(negedge M_READY);         // M_READY xuống khi transfer bắt đầu
 
         // Release CNTL so master can transition back to IDLE later
